@@ -7,6 +7,7 @@ import android.widget.FrameLayout;
 
 import com.badlogic.gdx.backends.android.AndroidApplication;
 import com.badlogic.gdx.backends.android.AndroidApplicationConfiguration;
+import com.miaojun.spine.mode.SpineBoy;
 
 /**
  * Created by miaojun on 2019/2/18.

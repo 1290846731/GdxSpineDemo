@@ -1,4 +1,4 @@
-package com.miaojun.spine;
+package com.miaojun.spine.mode;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
@@ -14,53 +14,51 @@ import com.esotericsoftware.spine.SkeletonJson;
 import com.esotericsoftware.spine.SkeletonRenderer;
 import com.esotericsoftware.spine.SkeletonRendererDebug;
 
-/**
- * Created by miaojun on 2019/2/18.
- */
-public class SpineBoy extends ApplicationAdapter {
+public class Speedy extends ApplicationAdapter {
+
     OrthographicCamera camera;
     SpriteBatch batch;
     SkeletonRenderer renderer;
     SkeletonRendererDebug debugRenderer;
-
     TextureAtlas atlas;
     Skeleton skeleton;
     AnimationState state;
+    SkeletonJson json;
 
-    public void create () {
+    public void create() {
         camera = new OrthographicCamera();
         batch = new SpriteBatch();
         renderer = new SkeletonRenderer();
-        renderer.setPremultipliedAlpha(true); // PMA results in correct blending without outlines.
+        renderer.setPremultipliedAlpha(false); // PMA results in correct blending without outlines.
         debugRenderer = new SkeletonRendererDebug();
         debugRenderer.setBoundingBoxes(false);
         debugRenderer.setRegionAttachments(false);
-
-        atlas = new TextureAtlas(Gdx.files.internal("spineboy/spineboy-pma.atlas"));
-        SkeletonJson json = new SkeletonJson(atlas); // This loads skeleton JSON data, which is stateless.
-        json.setScale(0.6f); // Load the skeleton at 60% the size it was in Spine.
-        SkeletonData skeletonData = json.readSkeletonData(Gdx.files.internal("spineboy/spineboy-ess.json"));
+        atlas = new TextureAtlas(Gdx.files.internal("speedy/speedy.atlas"));
+        json = new SkeletonJson(atlas); // This loads skeleton JSON data, which is stateless.
+        json.setScale(0.7f); // Load the skeleton at 60% the size it was in Spine.
+        SkeletonData skeletonData = json.readSkeletonData(Gdx.files.internal("speedy/speedy.json"));
 
         skeleton = new Skeleton(skeletonData); // Skeleton holds skeleton state (bone positions, slot attachments, etc).
-        skeleton.setPosition(250, 20);
+        skeleton.setPosition(175, 0);
 
         AnimationStateData stateData = new AnimationStateData(skeletonData); // Defines mixing (crossfading) between animations.
-        stateData.setMix("run", "jump", 0.2f);
-        stateData.setMix("jump", "run", 0.2f);
+        stateData.setMix("run", "run", 0.2f);
 
         state = new AnimationState(stateData); // Holds the animation state for a skeleton (current animation, time, etc).
-        state.setTimeScale(0.5f); // Slow all animations down to 50% speed.
+        state.setTimeScale(1.0f); // Slow all animations down to 50% speed.
 
         // Queue animations on track 0.
         state.setAnimation(0, "run", true);
-        state.addAnimation(0, "jump", false, 2); // Jump after 2 seconds.
+
         state.addAnimation(0, "run", true, 0); // Run after the jump.
     }
 
-    public void render () {
+    public void render() {
         state.update(Gdx.graphics.getDeltaTime()); // Update the animation time.
 
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
+        Gdx.gl.glClearColor(0, 0, 0, 0);
 
         state.apply(skeleton); // Poses skeleton using current animations. This sets the bones' local SRT.
         skeleton.updateWorldTransform(); // Uses the bones' local SRT to compute their world SRT.
@@ -74,15 +72,30 @@ public class SpineBoy extends ApplicationAdapter {
         renderer.draw(batch, skeleton); // Draw the skeleton images.
         batch.end();
 
-        debugRenderer.draw(skeleton); // Draw debug lines.
+//        debugRenderer.draw(skeleton); // Draw debug lines.
     }
 
-    public void resize (int width, int height) {
+    public void resize(int width, int height) {
         camera.setToOrtho(false); // Update camera with new size.
     }
 
-    public void dispose () {
+    public void dispose() {
         atlas.dispose();
     }
 
+    public void setAnimate() {
+        setAnimate("run");
+    }
+
+    public void setAnimate(String animate) {
+        state.addAnimation(0, animate, true, 0);
+    }
+
+    public void zoomBig() {
+        camera.zoom = 0.5f;
+    }
+
+    public void zoomSmall() {
+        camera.zoom = 1f;
+    }
 }
